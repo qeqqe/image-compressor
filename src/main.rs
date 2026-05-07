@@ -6,7 +6,7 @@ fn main() {
     let _ = Compressor::compress(
         std::path::PathBuf::from("./assets/vro.ppm"),
         compressor::CompressionTechnique::Gaussian,
-        std::path::PathBuf::from("./new.ppm"),
-        1,
+        std::path::PathBuf::from("./compressed-vro.ppm"),
+        8, // from 1 to 10
     );
 }

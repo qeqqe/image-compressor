@@ -4,9 +4,9 @@ mod compressor;
 
 fn main() {
     let _ = Compressor::compress(
-        std::path::PathBuf::from("./assets/vro.ppm"),
+        std::path::PathBuf::from("./assets/windark.png"),
         compressor::CompressionTechnique::Gaussian,
-        std::path::PathBuf::from("./compressed-vro.ppm"),
-        8, // from 1 to 10
+        std::path::PathBuf::from("./windark-comp.ppm"),
+        9, // from 1 to 10
     );
 }

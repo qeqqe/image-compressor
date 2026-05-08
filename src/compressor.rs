@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::{error::Error, path::PathBuf};
+use std::{error::Error, f32::consts::PI, path::PathBuf};
 
 use image::{DynamicImage, ImageReader, Rgb, RgbImage};
 use ndarray::Array2;
@@ -48,6 +48,7 @@ impl Compressor {
 
         let mut out = RgbImage::new(n_width, n_height);
 
+        // compressed:original ratio
         let downscale_ratio = 1.0 / compression_factor;
         let sigma = downscale_ratio / 2.0;
 
@@ -96,6 +97,19 @@ impl Compressor {
                 );
             }
         }
+
+        println!(
+            "Info:\n compression_level: {} \n compression_factor: {} \n original_dimensions: {:?} \n new_dimensions: ({}, {}) \n downscale_ratio: {} \n stride: {} \n k: {} \n kernel: {:?} \n",
+            compression_level,
+            compression_factor,
+            original_dimensions,
+            n_width,
+            n_height,
+            downscale_ratio,
+            stride,
+            k,
+            kernel
+        );
         out.save(destination)?;
 
         Ok(())
@@ -103,21 +117,33 @@ impl Compressor {
 
     fn build_gaussian_kernel(k: usize, sigma: f32) -> Array2<f32> {
         let mut kernel: Array2<f32> = Array2::zeros((k, k));
+
+        // take center points cus gussian distribution
+        // has the max value at the center
         let cx = (k / 2) as isize;
         let cy = (k / 2) as isize;
+
         let mut sum = 0.0f32;
 
         for y in 0..k {
             for x in 0..k {
                 let dx = (x as isize - cx) as f32;
                 let dy = (y as isize - cy) as f32;
-                let val = (-(dx.powi(2) + dy.powi(2)) / (2.0 * sigma.powi(2))).exp();
+                let val = 1.0 / (2.0 * PI * sigma.powi(2))
+                    * (-(dx.powi(2) + dy.powi(2)) / (2.0 * sigma.powi(2))).exp();
                 kernel[[y, x]] = val;
                 sum += val;
             }
         }
 
         kernel.mapv_inplace(|v| v / sum);
+        let mut temp_sum = 0.0f32;
+
+        for v in &kernel {
+            temp_sum += v;
+        }
+
+        println!("Total kernel sum: {}", temp_sum);
         kernel
     }
 
